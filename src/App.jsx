@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { 
   Clock, 
   CalendarDays, 
@@ -10,12 +10,351 @@ import {
   Terminal,
   RotateCcw,
   BookOpen,
-  Timer,
-  CalendarClock,
-  CalendarRange
+  ArrowLeft,
+  Zap,
+  AlertCircle,
+  CheckCircle,
+  Code2,
+  Layers,
+  Target,
+  GitBranch,
+  Activity
 } from "lucide-react";
-import Docs from "./Docs";
 
+// Comprehensive Documentation Component (Clean SaaS Style)
+function Docs({ onBack }) {
+  const sections = [
+    {
+      id: "intro",
+      title: "What is SAP Job Scheduling?",
+      icon: BookOpen,
+      content: `SAP Job Scheduling Service is a cloud-native solution that enables you to define and manage recurring or scheduled tasks in your SAP Business Technology Platform applications. It provides a robust cron-based scheduling mechanism for automating business processes, data synchronization, batch processing, and maintenance tasks.`
+    },
+    {
+      id: "xscron",
+      title: "Understanding XS Cron Format",
+      icon: Code2,
+      content: `SAP XS Advanced uses an extended cron format with seven fields instead of the traditional five. This provides more granular control over job execution timing, particularly useful for enterprise applications requiring precise scheduling.`
+    },
+    {
+      id: "format",
+      title: "The Seven-Field Format",
+      icon: Layers,
+      content: `Unlike standard Unix cron (which uses 5 fields), SAP XS Cron uses 7 fields in this order: Year, Month, Day of Month, Day of Week, Hour, Minute, and Second. This allows you to specify exact execution times down to the second and even constrain jobs to specific years.`
+    }
+  ];
+
+  const fieldDetails = [
+    {
+      position: 1,
+      name: "Year",
+      range: "1970-2099 or *",
+      description: "Specifies a specific year or * for any year. Useful for creating time-limited scheduled jobs.",
+      examples: ["2026 (only in year 2026)", "* (every year)"]
+    },
+    {
+      position: 2,
+      name: "Month",
+      range: "1-12 or *",
+      description: "Numeric month value where 1 = January, 12 = December. Use * to run in all months.",
+      examples: ["3 (March only)", "* (every month)", "1,6,12 (Jan, Jun, Dec)"]
+    },
+    {
+      position: 3,
+      name: "Day of Month",
+      range: "1-31 or *",
+      description: "Day of the month. Be careful with months having fewer than 31 days.",
+      examples: ["1 (first day)", "15 (mid-month)", "* (every day)"]
+    },
+    {
+      position: 4,
+      name: "Day of Week",
+      range: "sun-sat or *",
+      description: "Three-letter day abbreviation. Multiple days can be combined with commas.",
+      examples: ["mon (Mondays)", "mon,wed,fri (specific days)", "* (every day)"]
+    },
+    {
+      position: 5,
+      name: "Hour",
+      range: "0-23 or *",
+      description: "24-hour format where 0 = midnight, 23 = 11 PM.",
+      examples: ["0 (midnight)", "12 (noon)", "*/2 (every 2 hours)"]
+    },
+    {
+      position: 6,
+      name: "Minute",
+      range: "0-59 or *",
+      description: "Minute of the hour.",
+      examples: ["0 (on the hour)", "30 (half past)", "*/15 (every 15 min)"]
+    },
+    {
+      position: 7,
+      name: "Second",
+      range: "0-59 or *",
+      description: "Second of the minute. Setting this to 20 helps prevent system overload.",
+      examples: ["0 (top of minute)", "20 (recommended)", "*/30 (every 30 sec)"]
+    }
+  ];
+
+  const operators = [
+    {
+      symbol: "*",
+      name: "Asterisk (Wildcard)",
+      description: "Matches any value for that field. Essential for flexible scheduling.",
+      example: "* * * * * * 0 runs every minute at 0 seconds"
+    },
+    {
+      symbol: "*/n",
+      name: "Step Values",
+      description: "Runs at every nth interval. Commonly used for repeated execution.",
+      example: "* * * * */2 0 20 runs every 2 hours at 00:20"
+    },
+    {
+      symbol: ",",
+      name: "List Separator",
+      description: "Specifies multiple specific values.",
+      example: "* * * mon,wed,fri 9 0 20 runs Mon, Wed, Fri at 9:00:20"
+    },
+    {
+      symbol: "-",
+      name: "Range",
+      description: "Defines a range of values (inclusive).",
+      example: "* 1-3 * * 10 0 20 runs in Jan-Mar at 10:00:20 daily"
+    }
+  ];
+
+  const useCases = [
+    {
+      title: "Data Synchronization",
+      icon: Activity,
+      description: "Sync data between systems at regular intervals",
+      pattern: "* * * * */1 0 20",
+      explanation: "Every hour at 20 seconds past the hour"
+    },
+    {
+      title: "Daily Reports",
+      icon: Target,
+      description: "Generate end-of-day reports for business intelligence",
+      pattern: "* * * * 23 30 20",
+      explanation: "Every day at 11:30:20 PM"
+    },
+    {
+      title: "Weekly Maintenance",
+      icon: GitBranch,
+      description: "Perform system cleanup and optimization tasks",
+      pattern: "* * * sun 2 0 20",
+      explanation: "Every Sunday at 2:00:20 AM"
+    },
+    {
+      title: "Monthly Archival",
+      icon: Layers,
+      description: "Archive old records on the first day of each month",
+      pattern: "* * 1 * 1 0 20",
+      explanation: "First day of every month at 1:00:20 AM"
+    }
+  ];
+
+  const bestPractices = [
+    {
+      type: "success",
+      title: "Use Second Offset",
+      description: "Set seconds to 20 to avoid system overload when many jobs trigger at :00"
+    },
+    {
+      type: "success",
+      title: "Be Timezone Aware",
+      description: "SAP Job Scheduler uses UTC by default. Plan your schedules accordingly"
+    },
+    {
+      type: "success",
+      title: "Test Thoroughly",
+      description: "Validate cron expressions before deploying to production environments"
+    },
+    {
+      type: "warning",
+      title: "Avoid Too Frequent",
+      description: "Sub-minute intervals can overload systems. Consider queue-based alternatives"
+    },
+    {
+      type: "warning",
+      title: "Consider Month Lengths",
+      description: "Day 31 won't trigger in months with fewer days (Feb, Apr, Jun, Sep, Nov)"
+    },
+    {
+      type: "warning",
+      title: "Monitor Failed Jobs",
+      description: "Implement logging and alerting for job execution failures"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-20">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-md hover:bg-gray-100 -ml-3"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Generator
+          </button>
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-blue-600" />
+            <span className="font-semibold text-gray-900 hidden sm:block">Documentation</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
+        
+        {/* Intro */}
+        <div className="mb-12 max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
+            SAP XS Cron Scheduling Guide
+          </h1>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Master the art of scheduling automated jobs in SAP Business Technology Platform. 
+            This comprehensive guide covers everything from basic syntax to advanced scheduling patterns.
+          </p>
+        </div>
+
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          {sections.map((section) => (
+            <div key={section.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+                <section.icon className="w-5 h-5 text-blue-600" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">{section.title}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed flex-grow">{section.content}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Field Details */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
+            <Calendar className="w-6 h-6 text-gray-400" />
+            <h2 className="text-2xl font-semibold text-gray-900">Cron Field Reference</h2>
+          </div>
+          <div className="space-y-4">
+            {fieldDetails.map((field) => (
+              <div key={field.position} className="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+                <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-500 border border-gray-200">
+                  {field.position}
+                </div>
+                <div className="flex-grow">
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <h3 className="text-base font-semibold text-gray-900">{field.name}</h3>
+                    <span className="text-xs font-mono font-medium text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-100">
+                      {field.range}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">{field.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {field.examples.map((example, idx) => (
+                      <span key={idx} className="text-xs font-mono bg-gray-50 border border-gray-200 px-2.5 py-1 rounded text-gray-700">
+                        {example}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Operators */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
+            <Code2 className="w-6 h-6 text-gray-400" />
+            <h2 className="text-2xl font-semibold text-gray-900">Special Characters & Operators</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {operators.map((op, idx) => (
+              <div key={idx} className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-xl font-mono text-gray-900 bg-gray-100 px-3 py-1 rounded border border-gray-200">
+                    {op.symbol}
+                  </span>
+                  <h3 className="text-base font-semibold text-gray-900">{op.name}</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-4 h-10">{op.description}</p>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                  <span className="text-xs text-gray-500 font-medium block mb-1">Example</span>
+                  <code className="text-sm font-mono text-gray-800">{op.example}</code>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Real World Use Cases */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
+            <Zap className="w-6 h-6 text-gray-400" />
+            <h2 className="text-2xl font-semibold text-gray-900">Real-World Use Cases</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {useCases.map((useCase, idx) => (
+              <div key={idx} className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <useCase.icon className="w-5 h-5 text-gray-500" />
+                  <h3 className="text-base font-semibold text-gray-900">{useCase.title}</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-5 h-10">{useCase.description}</p>
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <code className="text-sm font-mono text-blue-300 block mb-2">{useCase.pattern}</code>
+                  <p className="text-xs text-gray-400 border-t border-gray-700 pt-2">
+                    {useCase.explanation}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Best Practices */}
+        <div>
+          <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
+            <AlertCircle className="w-6 h-6 text-gray-400" />
+            <h2 className="text-2xl font-semibold text-gray-900">Best Practices & Tips</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {bestPractices.map((practice, idx) => (
+              <div key={idx} className={`rounded-xl p-5 sm:p-6 border flex gap-4 ${
+                practice.type === "success" ? "bg-green-50/50 border-green-200" : "bg-amber-50/50 border-amber-200"
+              }`}>
+                <div className="flex-shrink-0 mt-0.5">
+                  {practice.type === "success" 
+                    ? <CheckCircle className="w-5 h-5 text-green-600" /> 
+                    : <AlertCircle className="w-5 h-5 text-amber-600" />}
+                </div>
+                <div>
+                  <h3 className={`text-sm font-semibold mb-1 ${
+                    practice.type === "success" ? "text-green-900" : "text-amber-900"
+                  }`}>
+                    {practice.title}
+                  </h3>
+                  <p className={`text-sm leading-relaxed ${
+                    practice.type === "success" ? "text-green-800/80" : "text-amber-800/80"
+                  }`}>
+                    {practice.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}
+
+// Main App Component (Generator)
 export default function App() {
   const [showDocs, setShowDocs] = useState(false);
   const [frequencyType, setFrequencyType] = useState("minute");
@@ -31,12 +370,9 @@ export default function App() {
   const [copied, setCopied] = useState(false);
 
   const days = [
-    { label: "Sun", value: "sun" },
-    { label: "Mon", value: "mon" },
-    { label: "Tue", value: "tue" },
-    { label: "Wed", value: "wed" },
-    { label: "Thu", value: "thu" },
-    { label: "Fri", value: "fri" },
+    { label: "Sun", value: "sun" }, { label: "Mon", value: "mon" },
+    { label: "Tue", value: "tue" }, { label: "Wed", value: "wed" },
+    { label: "Thu", value: "thu" }, { label: "Fri", value: "fri" },
     { label: "Sat", value: "sat" }
   ];
 
@@ -142,139 +478,108 @@ export default function App() {
     return <Docs onBack={() => setShowDocs(false)} />;
   }
 
-  // Helper to render cron parts with syntax highlighting and tooltips
+  // Clean, functional syntax highlighting and standard tooltips
   const renderCronPart = (part, index) => {
     const isAsterisk = part === '*';
     const isNumber = !isNaN(part) && part !== '';
     
-    let colorClass;
-    if (isAsterisk) colorClass = "text-pink-400 drop-shadow-[0_0_8px_rgba(244,114,182,0.6)]";
-    else if (isNumber) colorClass = "text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]";
-    else if (part.includes('/')) colorClass = "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]";
-    else colorClass = "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"; // days like tue,wed
+    let colorClass = "text-gray-300";
+    if (isAsterisk) colorClass = "text-pink-400";
+    else if (isNumber) colorClass = "text-blue-400";
+    else if (part.includes('/')) colorClass = "text-emerald-400";
+    else colorClass = "text-amber-400";
 
-    // Alternate tooltip position: Top for even indices, Bottom for odd indices
     const isTop = index % 2 === 0;
 
     return (
-      <div key={index} className="relative group inline-block mx-2 sm:mx-3 cursor-help">
-        <span className={`${colorClass} transition-all duration-300 group-hover:text-white group-hover:scale-125 inline-block font-black`}>
+      <div key={index} className="relative group inline-block mx-1.5 sm:mx-2 cursor-pointer">
+        <span className={`${colorClass} transition-colors duration-200 group-hover:text-white inline-block`}>
           {part}
         </span>
-        {/* Tooltip */}
-        <div className={`absolute ${isTop ? 'bottom-full mb-4 translate-y-2' : 'top-full mt-4 -translate-y-2'} left-1/2 -translate-x-1/2 bg-gradient-to-br from-white to-slate-50 text-slate-900 text-xs font-black py-2 px-4 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-2xl border-2 border-indigo-200 z-10 group-hover:translate-y-0 tracking-normal font-sans`}>
+        {/* Simple, standard web tooltip */}
+        <div className={`absolute ${isTop ? 'bottom-full mb-2 translate-y-1' : 'top-full mt-2 -translate-y-1'} left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium py-1.5 px-2.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-10 group-hover:translate-y-0 tracking-normal font-sans border border-gray-700`}>
           {cronPartsNames[index]}
-          <div className={`absolute ${isTop ? '-bottom-2 border-b-2 border-r-2' : '-top-2 border-t-2 border-l-2'} left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-indigo-200 rotate-45`}></div>
+          <div className={`absolute ${isTop ? '-bottom-1' : '-top-1'} left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 border-gray-700 ${isTop ? 'border-b border-r' : 'border-t border-l'} rotate-45`}></div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-blue-50/40 text-slate-800 font-sans selection:bg-indigo-200 selection:text-indigo-900">
-      {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-300/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 right-1/3 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl"></div>
-      </div>
-
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-20 shadow-lg shadow-slate-200/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-indigo-600 to-blue-600 p-3 rounded-2xl shadow-lg shadow-indigo-500/30 relative">
-              <Settings2 className="w-6 h-6 text-white animate-[spin_20s_linear_infinite]" />
-              <div className="absolute inset-0 bg-white/20 rounded-2xl blur animate-pulse"></div>
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+      {/* App Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center">
+              <Settings2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 via-blue-600 to-purple-600">
-                  SAP Job Schedule Generator
-                </h1>
-                <span className="text-[10px] font-black tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-2 py-0.5 rounded-md shadow-sm">Free</span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">XS Advanced Cron Expression Builder</p>
+              <h1 className="text-lg font-semibold text-gray-900 leading-tight">
+                SAP Cron Generator
+              </h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button 
               onClick={handleReset}
-              className="text-sm font-semibold text-slate-600 hover:text-indigo-700 flex items-center gap-2 transition-all bg-slate-100 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-blue-50 px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md border border-slate-200/50 hover:border-indigo-200"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-md hover:bg-gray-100"
             >
               <RotateCcw className="w-4 h-4" />
               <span className="hidden sm:inline">Reset</span>
             </button>
             <button
               onClick={() => setShowDocs(true)}
-              className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-2 transition-all bg-indigo-50 hover:bg-gradient-to-br hover:from-indigo-100 hover:to-blue-100 px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md border border-indigo-200/50 hover:border-indigo-300"
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-md hover:bg-blue-50"
             >
               <BookOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Learn</span>
+              <span className="hidden sm:inline">Docs</span>
             </button>
-            <a 
-              href="https://help.sap.com/docs/job-scheduling/sap-job-scheduling-service/schedule-formats?locale=en-US" 
-              target="_blank" 
-              rel="noreferrer"
-              className="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-2 transition-all hover:bg-blue-50 px-4 py-2.5 rounded-xl border border-blue-200/50 hover:border-blue-300 shadow-sm hover:shadow-md"
-            >
-              <Info className="w-4 h-4" />
-              <span className="hidden sm:inline">SAP Docs</span>
-            </a>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      {/* Main Layout */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           
           {/* LEFT COLUMN: Controls */}
           <div className="lg:col-span-5 space-y-6">
             
-            {/* Control Card */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-slate-200/60 p-8 sm:p-10 hover:shadow-indigo-200/50 transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-1 h-8 bg-gradient-to-b from-indigo-600 to-blue-600 rounded-full"></div>
-                <h2 className="text-2xl font-bold text-slate-900">
-                  Configure Schedule
-                </h2>
-              </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-5">
+                Schedule Configuration
+              </h2>
 
-              {/* Frequency Selection */}
-              <div className="mb-8">
-                <label className="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <div className="w-1.5 h-4 bg-gradient-to-b from-indigo-600 to-blue-600 rounded-full"></div>
+              {/* Frequency Type */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Frequency Type
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {frequencyOptions.map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => setFrequencyType(opt.id)}
-                      className={`group relative flex flex-col items-center justify-center p-5 rounded-2xl border-2 transition-all duration-200 ${
+                      className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border transition-colors ${
                         frequencyType === opt.id
-                          ? "border-indigo-600 bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/40 scale-105"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50/50 hover:scale-102 shadow-sm"
+                          ? "border-blue-600 bg-blue-50 text-blue-700"
+                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                       }`}
                     >
-                      <opt.icon className={`w-6 h-6 mb-2 transition-transform ${frequencyType === opt.id ? 'text-white scale-110' : 'text-slate-400 group-hover:text-indigo-500'}`} />
-                      <span className={`text-sm font-bold ${frequencyType === opt.id ? 'text-white' : 'text-slate-700'}`}>{opt.label}</span>
-                      {frequencyType === opt.id && (
-                        <div className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse"></div>
-                      )}
+                      <opt.icon className={`w-5 h-5 mb-1.5 ${frequencyType === opt.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <span className="text-xs font-medium">{opt.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-6">
-                {/* Conditional Inputs based on Frequency */}
+              {/* Dynamic Inputs */}
+              <div className="space-y-5">
                 {(frequencyType === "minute" || frequencyType === "hourly") && (
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 p-6 rounded-2xl border-2 border-slate-200/60 shadow-inner">
-                    <label className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide flex items-center gap-2">
-                      <div className="w-1.5 h-4 bg-gradient-to-b from-slate-700 to-blue-600 rounded-full"></div>
-                      Repeat Every <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">{frequencyType === "minute" ? "Minutes" : "Hours"}</span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Repeat Every {frequencyType === "minute" ? "Minutes" : "Hours"}
                     </label>
                     <input
                       type="number"
@@ -282,20 +587,20 @@ export default function App() {
                       min="1"
                       max="999"
                       onChange={(e) => setRepeatEvery(e.target.value)}
-                      className="block w-full px-5 py-4 text-xl font-bold border-2 border-slate-300 rounded-2xl focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white shadow-md transition-all hover:border-indigo-400"
+                      className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 )}
 
                 {(frequencyType === "monthly" || frequencyType === "yearly") && (
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 p-6 rounded-2xl border-2 border-slate-200/60 shadow-inner grid grid-cols-2 gap-5">
+                  <div className="grid grid-cols-2 gap-4">
                     {frequencyType === "yearly" && (
                       <div>
-                        <label className="block text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Month</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Month</label>
                         <select
                           value={month}
                           onChange={(e) => setMonth(e.target.value)}
-                          className="block w-full px-4 py-4 text-base font-bold border-2 border-slate-300 rounded-2xl focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white shadow-md hover:border-indigo-400 transition-all"
+                          className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                         >
                           {months.map(m => (
                             <option key={m.value} value={m.value}>{m.label}</option>
@@ -304,61 +609,60 @@ export default function App() {
                       </div>
                     )}
                     <div className={frequencyType === "monthly" ? "col-span-2" : ""}>
-                      <label className="block text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Day of Month <span className="text-slate-400 font-normal normal-case">(1-31)</span></label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Day of Month</label>
                       <input
                         type="number"
                         min="1"
                         max="31"
                         value={dayOfMonth}
                         onChange={(e) => setDayOfMonth(e.target.value)}
-                        className="block w-full px-5 py-4 text-xl font-bold border-2 border-slate-300 rounded-2xl focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white shadow-md hover:border-indigo-400 transition-all"
+                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
                 )}
 
                 {["daily", "weekly", "monthly", "yearly"].includes(frequencyType) && (
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 p-6 rounded-2xl border-2 border-slate-200/60 shadow-inner grid grid-cols-2 gap-5">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Hour <span className="text-slate-400 font-normal normal-case">(0-23)</span></label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Hour (0-23)</label>
                       <input
                         type="number"
                         min="0"
                         max="23"
                         value={hour}
                         onChange={(e) => setHour(e.target.value)}
-                        className="block w-full px-5 py-4 text-xl font-bold border-2 border-slate-300 rounded-2xl focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white shadow-md hover:border-indigo-400 transition-all"
+                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Minute <span className="text-slate-400 font-normal normal-case">(0-59)</span></label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Minute (0-59)</label>
                       <input
                         type="number"
                         min="0"
                         max="59"
                         value={minute}
                         onChange={(e) => setMinute(e.target.value)}
-                        className="block w-full px-5 py-4 text-xl font-bold border-2 border-slate-300 rounded-2xl focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white shadow-md hover:border-indigo-400 transition-all"
+                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
                 )}
 
                 {frequencyType === "weekly" && (
-                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 p-6 rounded-2xl border-2 border-slate-200/60 shadow-inner">
-                    <label className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wide flex items-center gap-2">
-                      <div className="w-1.5 h-4 bg-gradient-to-b from-slate-700 to-blue-600 rounded-full"></div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Select Days
                     </label>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2">
                       {days.map((day) => (
                         <button
                           key={day.value}
                           onClick={() => toggleDay(day.value)}
-                          className={`px-5 py-3 text-sm font-bold rounded-xl border-2 transition-all duration-200 ${
+                          className={`px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
                             weekDays.includes(day.value)
-                              ? "bg-gradient-to-br from-slate-800 to-slate-900 text-white border-slate-800 shadow-xl shadow-slate-500/40 scale-105"
-                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50 shadow-sm hover:scale-102"
+                              ? "bg-gray-800 text-white border-gray-800"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                           }`}
                         >
                           {day.label}
@@ -368,129 +672,101 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="pt-2">
-                  <div className={`p-6 rounded-2xl border-2 transition-all duration-300 ${isSpecificYear ? 'bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-300 shadow-lg shadow-indigo-200/50' : 'bg-gradient-to-br from-slate-50 to-blue-50/50 border-slate-200/60 shadow-inner'}`}>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="text-base font-bold text-slate-900 flex items-center gap-2">
-                          Specific Year Constraint
-                          {isSpecificYear && <span className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">ACTIVE</span>}
-                        </label>
-                        <p className="text-xs text-slate-600 mt-1 font-medium">Restrict job to a single year</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsSpecificYear(!isSpecificYear)}
-                        className={`relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-indigo-500/30 shadow-md ${isSpecificYear ? 'bg-gradient-to-r from-indigo-600 to-blue-600 shadow-indigo-500/50' : 'bg-slate-300'}`}
-                      >
-                        <span className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out ${isSpecificYear ? 'translate-x-6' : 'translate-x-0'}`} />
-                      </button>
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-900">Specific Year Limit</label>
+                      <p className="text-xs text-gray-500 mt-0.5">Restrict to a single year</p>
                     </div>
-                    
-                    {isSpecificYear && (
-                      <div className="mt-5 pt-5 border-t-2 border-indigo-200/50 animate-fadeIn">
-                        <label className="block text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Target Year</label>
-                        <input
-                          type="number"
-                          min="1970"
-                          max="2099"
-                          value={year}
-                          onChange={(e) => setYear(e.target.value)}
-                          className="block w-full px-5 py-4 text-xl font-bold border-2 border-indigo-300 rounded-2xl focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 bg-white shadow-md hover:border-indigo-400 transition-all"
-                        />
-                      </div>
-                    )}
+                    {/* Standard CSS Toggle Switch */}
+                    <button
+                      type="button"
+                      onClick={() => setIsSpecificYear(!isSpecificYear)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSpecificYear ? 'bg-blue-600' : 'bg-gray-200'}`}
+                    >
+                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isSpecificYear ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
                   </div>
+                  
+                  {isSpecificYear && (
+                    <div className="mb-2">
+                      <input
+                        type="number"
+                        min="1970"
+                        max="2099"
+                        value={year}
+                        onChange={(e) => setYear(e.target.value)}
+                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  )}
                 </div>
 
-                {/* Always show second, it's specific to SAP XS */}
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50/50 p-6 rounded-2xl border-2 border-amber-200/60 shadow-inner">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                      <div className="w-1.5 h-4 bg-gradient-to-b from-amber-600 to-orange-600 rounded-full"></div>
-                      Second Offset
-                    </label>
-                    <span className="text-[10px] font-black tracking-wider uppercase text-amber-800 bg-amber-200 px-3 py-1 rounded-full shadow-sm">⚡ Recommended: 20</span>
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-900">Second Offset</label>
+                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Default: 20</span>
                   </div>
-                  <p className="text-xs text-slate-700 mb-4 leading-relaxed font-medium bg-white/60 p-3 rounded-xl">
-                    Staggering jobs by 20 seconds prevents system overload exactly at the top of the minute.
-                  </p>
                   <input
                     type="number"
                     min="0"
                     max="59"
                     value={second}
                     onChange={(e) => setSecond(e.target.value)}
-                    className="block w-full px-5 py-4 text-xl font-bold border-2 border-amber-300 rounded-2xl focus:ring-4 focus:ring-amber-500/30 focus:border-amber-500 bg-white shadow-md hover:border-amber-400 transition-all"
+                    className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Staggering jobs by 20 seconds prevents system overload at the exact minute mark.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* RIGHT COLUMN: Output & Reference */}
-          <div className="lg:col-span-7 space-y-6 lg:sticky lg:top-24">
+          <div className="lg:col-span-7 space-y-6">
             
-            {/* Result Card */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl overflow-hidden border-2 border-slate-700/50 relative group">
-              {/* Animated gradient border effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 opacity-75 blur-xl group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              <div className="relative bg-slate-900/95 backdrop-blur-sm rounded-3xl">
-                <div className="bg-gradient-to-r from-slate-800/90 via-slate-800/80 to-slate-800/90 px-6 py-4 border-b border-slate-700/50 flex items-center justify-between backdrop-blur-md">
-                  <div className="flex items-center gap-3 text-slate-200 text-base font-bold tracking-wide">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/50">
-                      <Terminal className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">Generated XS Cron String</span>
-                  </div>
-                  <button
-                    onClick={handleCopy}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black transition-all duration-300 shadow-lg ${
-                      copied 
-                        ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-emerald-500/60 scale-105" 
-                        : "bg-gradient-to-r from-white to-slate-100 text-slate-900 hover:from-indigo-100 hover:to-blue-100 hover:shadow-indigo-500/30 hover:scale-105"
-                    }`}
-                  >
-                    {copied ? <CheckCircle2 className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-                    {copied ? "Copied!" : "Copy Cron"}
-                  </button>
+            {/* Result Component */}
+            <div className="bg-[#0D1117] rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-[#161B22] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
+                  <Terminal className="w-4 h-4" />
+                  <span>Resulting Cron Expression</span>
                 </div>
-                
-                <div className="p-8 sm:p-12 lg:p-16 flex flex-col items-center justify-center min-h-[240px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800/50 via-slate-900 to-slate-900 relative overflow-hidden">
-                  {/* Animated background effects */}
-                  <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-pulse"></div>
-                  
-                  <div className="relative z-10 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-mono font-black tracking-widest text-center flex flex-wrap justify-center items-center gap-y-6 gap-x-4">
-                    {cron.split(' ').map((part, i) => renderCronPart(part, i))}
-                  </div>
-                
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border border-gray-700"
+                >
+                  {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+              
+              <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[160px]">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-mono text-center flex flex-wrap justify-center items-center gap-y-4 gap-x-2">
+                  {cron.split(' ').map((part, i) => renderCronPart(part, i))}
                 </div>
               </div>
             </div>
 
-            {/* Reference Data Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            {/* Reference Information Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Format Table */}
-              <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border-2 border-slate-200/60 overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
-                <div className="bg-gradient-to-r from-slate-100 to-blue-50 px-6 py-5 border-b border-slate-200/60">
-                  <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
-                    <div className="w-1 h-6 bg-gradient-to-b from-indigo-600 to-blue-600 rounded-full"></div>
-                    Format Reference
-                  </h3>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+                  <h3 className="font-semibold text-sm text-gray-900">Format Reference</h3>
                 </div>
-                <div className="p-0 overflow-x-auto flex-grow">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-[11px] text-slate-600 uppercase bg-slate-50/80 tracking-wider border-b-2 border-slate-200">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left border-collapse">
+                    <thead className="text-xs text-gray-500 border-b border-gray-200">
                       <tr>
-                        <th className="px-6 py-4 font-black">Pos</th>
-                        <th className="px-6 py-4 font-black">Field</th>
-                        <th className="px-6 py-4 font-black">Allowed</th>
+                        <th className="px-4 py-2.5 font-medium">Pos</th>
+                        <th className="px-4 py-2.5 font-medium">Field</th>
+                        <th className="px-4 py-2.5 font-medium">Allowed Values</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tbody className="divide-y divide-gray-100 text-gray-600">
                       {[
                         { p: 1, n: "Year", v: "1970-2099, *" },
                         { p: 2, n: "Month", v: "1-12, *" },
@@ -500,10 +776,10 @@ export default function App() {
                         { p: 6, n: "Minute", v: "0-59, *" },
                         { p: 7, n: "Second", v: "0-59, *" },
                       ].map((row) => (
-                        <tr key={row.p} className="hover:bg-indigo-50/50 transition-colors">
-                          <td className="px-6 py-4 font-mono text-indigo-600 font-black text-base">{row.p}</td>
-                          <td className="px-6 py-4 font-bold text-slate-800">{row.n}</td>
-                          <td className="px-6 py-4 font-mono text-xs text-slate-600 font-medium">{row.v}</td>
+                        <tr key={row.p}>
+                          <td className="px-4 py-2 font-mono text-xs text-gray-400">{row.p}</td>
+                          <td className="px-4 py-2">{row.n}</td>
+                          <td className="px-4 py-2 font-mono text-xs text-gray-500">{row.v}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -511,32 +787,23 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Examples */}
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl shadow-xl border-2 border-indigo-200/60 overflow-hidden flex flex-col hover:shadow-2xl hover:shadow-indigo-200/50 transition-shadow duration-300">
-                <div className="bg-gradient-to-r from-indigo-100/80 to-blue-100/80 px-6 py-5 border-b border-indigo-200/60">
-                  <h3 className="font-black text-lg text-indigo-900 flex items-center gap-2">
-                    <div className="w-1 h-6 bg-gradient-to-b from-indigo-600 to-blue-600 rounded-full"></div>
-                    Common Patterns
-                  </h3>
+              {/* Examples List */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+                  <h3 className="font-semibold text-sm text-gray-900">Examples</h3>
                 </div>
-                <div className="p-6 space-y-6 flex-grow">
+                <div className="p-4 space-y-4">
                   {[
-                    { desc: "Every 10 mins at 20s", val: "* * * * * */10 20", icon: Timer },
-                    { desc: "Every 2 hours at 0m 20s", val: "* * * * */2 0 20", icon: Clock },
-                    { desc: "Tuesdays at 10:30:20", val: "* * * tue 10 30 20", icon: CalendarDays },
-                    { desc: "1st of every month at 08:30:20", val: "* * 1 * 8 30 20", icon: CalendarClock },
-                    { desc: "Specific year (2026) daily at noon", val: "2026 * * * 12 0 20", icon: CalendarRange },
+                    { desc: "Every 10 mins at 20s", val: "* * * * * */10 20" },
+                    { desc: "Every 2 hours at 0m 20s", val: "* * * * */2 0 20" },
+                    { desc: "Tuesdays at 10:30:20", val: "* * * tue 10 30 20" },
+                    { desc: "1st of month at 08:30:20", val: "* * 1 * 8 30 20" },
                   ].map((ex, i) => (
-                    <div key={i} className="group">
-                      <div className="text-[11px] font-black uppercase tracking-wider text-indigo-700 mb-2 flex items-center gap-2">
-                        <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/30">
-                          <ex.icon className="w-4 h-4 text-white" />
-                        </div>
-                        {ex.desc}
-                      </div>
-                      <div className="font-mono text-sm bg-white border-2 border-indigo-200 rounded-xl px-5 py-3.5 text-slate-800 select-all cursor-text group-hover:border-indigo-400 group-hover:shadow-lg group-hover:shadow-indigo-200/50 transition-all shadow-md font-bold">
+                    <div key={i} className="flex flex-col gap-1">
+                      <span className="text-xs font-medium text-gray-500">{ex.desc}</span>
+                      <code className="text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 text-gray-800 select-all">
                         {ex.val}
-                      </div>
+                      </code>
                     </div>
                   ))}
                 </div>
@@ -545,30 +812,6 @@ export default function App() {
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-16 mb-8 text-center relative z-10">
-          <div className="inline-block bg-white/80 backdrop-blur-sm px-8 py-4 rounded-2xl shadow-lg border border-slate-200/60">
-            <p className="text-sm text-slate-600 font-medium">
-              Built for SAP Job Scheduling •{" "}
-              <button
-                onClick={() => setShowDocs(true)}
-                className="text-indigo-600 hover:text-indigo-700 font-bold underline decoration-2 underline-offset-2 hover:decoration-indigo-400 transition-colors"
-              >
-                Read the Guide
-              </button>
-              {" "}•{" "}
-              <a 
-                href="https://help.sap.com/docs/job-scheduling/sap-job-scheduling-service/schedule-formats?locale=en-US" 
-                target="_blank" 
-                rel="noreferrer"
-                className="text-blue-600 hover:text-blue-700 font-bold underline decoration-2 underline-offset-2 hover:decoration-blue-400 transition-colors"
-              >
-                SAP Documentation
-              </a>
-            </p>
-          </div>
-        </footer>
       </main>
     </div>
   );
