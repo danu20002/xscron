@@ -208,7 +208,6 @@ function Docs({ onBack }) {
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
-        
         {/* Intro */}
         <div className="mb-12 max-w-3xl">
           <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
@@ -479,11 +478,14 @@ export default function App() {
     if (typeof window === 'undefined') return;
     try {
       const ads = document.querySelectorAll('.adsbygoogle');
-      ads.forEach(() => {
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {
-          // ignore push errors
+      ads.forEach((adBlock) => {
+        // Only push if the block hasn't been filled yet to prevent errors
+        if (adBlock && adBlock.innerHTML.trim() === "") {
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (e) {
+            // ignore push errors
+          }
         }
       });
     } catch (e) {
@@ -524,9 +526,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      {/* App Header */}
+      {/* App Header (Expanded max width to accommodate broader layout) */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-blue-600 p-1.5 rounded-lg flex items-center justify-center">
               <Settings2 className="w-5 h-5 text-white" />
@@ -557,290 +559,357 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
-        {/* Google AdSense banner (replace client and slot IDs) */}
-        <div className="mb-6 flex justify-center">
+      {/* Main Layout (Using an overarching container to handle Ads gracefully) */}
+      <main className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+        
+        {/* Top Horizontal Banner Ad */}
+        <div className="mb-6 flex justify-center min-h-[90px] w-full bg-gray-50 overflow-hidden">
           <ins
             className="adsbygoogle"
-            style={{ display: 'block', width: '100%', maxWidth: '728px', height: '90px' }}
-            data-ad-client="pub-1045963508580365"
-            data-ad-slot="REPLACE_SLOT"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-1045963508580365"
+            data-ad-slot="5616122519"
             data-ad-format="auto"
             data-full-width-responsive="true"
             data-adtest={isLocal ? "on" : undefined}
           ></ins>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+        {/* Layout wrapper preventing grid squish: Sidebars + Middle UI */}
+        <div className="flex flex-col xl:flex-row gap-6 lg:gap-8 items-start justify-center">
           
-          {/* LEFT COLUMN: Controls */}
-          <div className="lg:col-span-5 space-y-6">
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-base font-semibold text-gray-900 mb-5">
-                Schedule Configuration
-              </h2>
+          {/* LEFT SIDEBAR Vertical Ad (hidden on mobile) */}
+          <div className="hidden xl:block w-[160px] 2xl:w-[250px] shrink-0">
+            <div className="sticky top-24 min-h-[600px] rounded-xl overflow-hidden">
+              <ins
+                className="adsbygoogle"
+                style={{ display: 'block' }}
+                data-ad-client="ca-pub-1045963508580365"
+                data-ad-slot="5616122519"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+                data-adtest={isLocal ? "on" : undefined}
+              ></ins>
+            </div>
+          </div>
+          
+          {/* MAIN GENERATOR UI (Guaranteed to be unaffected by ads) */}
+          <div className="flex-1 max-w-5xl w-full mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+              
+              {/* LEFT COLUMN: Controls */}
+              <div className="lg:col-span-5 space-y-6">
+                
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-base font-semibold text-gray-900 mb-5">
+                    Schedule Configuration
+                  </h2>
 
-              {/* Frequency Type */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Frequency Type
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {frequencyOptions.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setFrequencyType(opt.id)}
-                      className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border transition-colors ${
-                        frequencyType === opt.id
-                          ? "border-blue-600 bg-blue-50 text-blue-700"
-                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <opt.icon className={`w-5 h-5 mb-1.5 ${frequencyType === opt.id ? 'text-blue-600' : 'text-gray-400'}`} />
-                      <span className="text-xs font-medium">{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dynamic Inputs */}
-              <div className="space-y-5">
-                {(frequencyType === "minute" || frequencyType === "hourly") && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Repeat Every {frequencyType === "minute" ? "Minutes" : "Hours"}
-                    </label>
-                    <input
-                      type="number"
-                      value={repeatEvery}
-                      min="1"
-                      max="999"
-                      onChange={(e) => setRepeatEvery(e.target.value)}
-                      className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                )}
-
-                {(frequencyType === "monthly" || frequencyType === "yearly") && (
-                  <div className="grid grid-cols-2 gap-4">
-                    {frequencyType === "yearly" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Month</label>
-                        <select
-                          value={month}
-                          onChange={(e) => setMonth(e.target.value)}
-                          className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                        >
-                          {months.map(m => (
-                            <option key={m.value} value={m.value}>{m.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    <div className={frequencyType === "monthly" ? "col-span-2" : ""}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Day of Month</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="31"
-                        value={dayOfMonth}
-                        onChange={(e) => setDayOfMonth(e.target.value)}
-                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {["daily", "weekly", "monthly", "yearly"].includes(frequencyType) && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Hour (0-23)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={hour}
-                        onChange={(e) => setHour(e.target.value)}
-                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Minute (0-59)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={minute}
-                        onChange={(e) => setMinute(e.target.value)}
-                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {frequencyType === "weekly" && (
-                  <div>
+                  {/* Frequency Type */}
+                  <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Days
+                      Frequency Type
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                      {days.map((day) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {frequencyOptions.map((opt) => (
                         <button
-                          key={day.value}
-                          onClick={() => toggleDay(day.value)}
-                          className={`px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
-                            weekDays.includes(day.value)
-                              ? "bg-gray-800 text-white border-gray-800"
-                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                          key={opt.id}
+                          onClick={() => setFrequencyType(opt.id)}
+                          className={`flex flex-col items-center justify-center py-3 px-2 rounded-lg border transition-colors ${
+                            frequencyType === opt.id
+                              ? "border-blue-600 bg-blue-50 text-blue-700"
+                              : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                           }`}
                         >
-                          {day.label}
+                          <opt.icon className={`w-5 h-5 mb-1.5 ${frequencyType === opt.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <span className="text-xs font-medium">{opt.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
-                )}
 
-                <div className="pt-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-900">Specific Year Limit</label>
-                      <p className="text-xs text-gray-500 mt-0.5">Restrict to a single year</p>
+                  {/* Dynamic Inputs */}
+                  <div className="space-y-5">
+                    {(frequencyType === "minute" || frequencyType === "hourly") && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Repeat Every {frequencyType === "minute" ? "Minutes" : "Hours"}
+                        </label>
+                        <input
+                          type="number"
+                          value={repeatEvery}
+                          min="1"
+                          max="999"
+                          onChange={(e) => setRepeatEvery(e.target.value)}
+                          className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    {(frequencyType === "monthly" || frequencyType === "yearly") && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {frequencyType === "yearly" && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Month</label>
+                            <select
+                              value={month}
+                              onChange={(e) => setMonth(e.target.value)}
+                              className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                            >
+                              {months.map(m => (
+                                <option key={m.value} value={m.value}>{m.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <div className={frequencyType === "monthly" ? "col-span-2" : ""}>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">Day of Month</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="31"
+                            value={dayOfMonth}
+                            onChange={(e) => setDayOfMonth(e.target.value)}
+                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {["daily", "weekly", "monthly", "yearly"].includes(frequencyType) && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">Hour (0-23)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="23"
+                            value={hour}
+                            onChange={(e) => setHour(e.target.value)}
+                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">Minute (0-59)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={minute}
+                            onChange={(e) => setMinute(e.target.value)}
+                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {frequencyType === "weekly" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Select Days
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {days.map((day) => (
+                            <button
+                              key={day.value}
+                              onClick={() => toggleDay(day.value)}
+                              className={`px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
+                                weekDays.includes(day.value)
+                                  ? "bg-gray-800 text-white border-gray-800"
+                                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-900">Specific Year Limit</label>
+                          <p className="text-xs text-gray-500 mt-0.5">Restrict to a single year</p>
+                        </div>
+                        {/* Standard CSS Toggle Switch */}
+                        <button
+                          type="button"
+                          onClick={() => setIsSpecificYear(!isSpecificYear)}
+                          className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSpecificYear ? 'bg-blue-600' : 'bg-gray-200'}`}
+                        >
+                          <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isSpecificYear ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </button>
+                      </div>
+                      
+                      {isSpecificYear && (
+                        <div className="mb-2">
+                          <input
+                            type="number"
+                            min="1970"
+                            max="2099"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      )}
                     </div>
-                    {/* Standard CSS Toggle Switch */}
+
+                    <div className="pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-medium text-gray-900">Second Offset</label>
+                        <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Default: 20</span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        value={second}
+                        onChange={(e) => setSecond(e.target.value)}
+                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Staggering jobs by 20 seconds prevents system overload at the exact minute mark.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: Output & Reference */}
+              <div className="lg:col-span-7 space-y-6">
+                
+                {/* Result Component */}
+                <div className="bg-[#0D1117] rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="bg-[#161B22] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
+                      <Terminal className="w-4 h-4" />
+                      <span>Resulting Cron Expression</span>
+                    </div>
                     <button
-                      type="button"
-                      onClick={() => setIsSpecificYear(!isSpecificYear)}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSpecificYear ? 'bg-blue-600' : 'bg-gray-200'}`}
+                      onClick={handleCopy}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border border-gray-700"
                     >
-                      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isSpecificYear ? 'translate-x-4' : 'translate-x-0'}`} />
+                      {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied ? "Copied" : "Copy"}
                     </button>
                   </div>
                   
-                  {isSpecificYear && (
-                    <div className="mb-2">
-                      <input
-                        type="number"
-                        min="1970"
-                        max="2099"
-                        value={year}
-                        onChange={(e) => setYear(e.target.value)}
-                        className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
+                  <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[160px]">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-mono text-center flex flex-wrap justify-center items-center gap-y-4 gap-x-2">
+                      {cron.split(' ').map((part, i) => renderCronPart(part, i))}
                     </div>
-                  )}
-                </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-gray-900">Second Offset</label>
-                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Default: 20</span>
                   </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={second}
-                    onChange={(e) => setSecond(e.target.value)}
-                    className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Staggering jobs by 20 seconds prevents system overload at the exact minute mark.
-                  </p>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* RIGHT COLUMN: Output & Reference */}
-          <div className="lg:col-span-7 space-y-6">
-            
-            {/* Result Component */}
-            <div className="bg-[#0D1117] rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-[#161B22] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
-                  <Terminal className="w-4 h-4" />
-                  <span>Resulting Cron Expression</span>
-                </div>
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors border border-gray-700"
-                >
-                  {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "Copied" : "Copy"}
-                </button>
-              </div>
-              
-              <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[160px]">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-mono text-center flex flex-wrap justify-center items-center gap-y-4 gap-x-2">
-                  {cron.split(' ').map((part, i) => renderCronPart(part, i))}
-                </div>
-              </div>
-            </div>
-
-            {/* Reference Information Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* Format Table */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
-                  <h3 className="font-semibold text-sm text-gray-900">Format Reference</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left border-collapse">
-                    <thead className="text-xs text-gray-500 border-b border-gray-200">
-                      <tr>
-                        <th className="px-4 py-2.5 font-medium">Pos</th>
-                        <th className="px-4 py-2.5 font-medium">Field</th>
-                        <th className="px-4 py-2.5 font-medium">Allowed Values</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-gray-600">
-                      {[
-                        { p: 1, n: "Year", v: "1970-2099, *" },
-                        { p: 2, n: "Month", v: "1-12, *" },
-                        { p: 3, n: "Day", v: "1-31, *" },
-                        { p: 4, n: "Day of Wk", v: "sun-sat, *" },
-                        { p: 5, n: "Hour", v: "0-23, *" },
-                        { p: 6, n: "Minute", v: "0-59, *" },
-                        { p: 7, n: "Second", v: "0-59, *" },
-                      ].map((row) => (
-                        <tr key={row.p}>
-                          <td className="px-4 py-2 font-mono text-xs text-gray-400">{row.p}</td>
-                          <td className="px-4 py-2">{row.n}</td>
-                          <td className="px-4 py-2 font-mono text-xs text-gray-500">{row.v}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Examples List */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
-                  <h3 className="font-semibold text-sm text-gray-900">Examples</h3>
-                </div>
-                <div className="p-4 space-y-4">
-                  {[
-                    { desc: "Every 10 mins at 20s", val: "* * * * * */10 20" },
-                    { desc: "Every 2 hours at 0m 20s", val: "* * * * */2 0 20" },
-                    { desc: "Tuesdays at 10:30:20", val: "* * * tue 10 30 20" },
-                    { desc: "1st of month at 08:30:20", val: "* * 1 * 8 30 20" },
-                  ].map((ex, i) => (
-                    <div key={i} className="flex flex-col gap-1">
-                      <span className="text-xs font-medium text-gray-500">{ex.desc}</span>
-                      <code className="text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 text-gray-800 select-all">
-                        {ex.val}
-                      </code>
+                {/* Reference Information Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* Format Table */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+                      <h3 className="font-semibold text-sm text-gray-900">Format Reference</h3>
                     </div>
-                  ))}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-left border-collapse">
+                        <thead className="text-xs text-gray-500 border-b border-gray-200">
+                          <tr>
+                            <th className="px-4 py-2.5 font-medium">Pos</th>
+                            <th className="px-4 py-2.5 font-medium">Field</th>
+                            <th className="px-4 py-2.5 font-medium">Allowed Values</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 text-gray-600">
+                          {[
+                            { p: 1, n: "Year", v: "1970-2099, *" },
+                            { p: 2, n: "Month", v: "1-12, *" },
+                            { p: 3, n: "Day", v: "1-31, *" },
+                            { p: 4, n: "Day of Wk", v: "sun-sat, *" },
+                            { p: 5, n: "Hour", v: "0-23, *" },
+                            { p: 6, n: "Minute", v: "0-59, *" },
+                            { p: 7, n: "Second", v: "0-59, *" },
+                          ].map((row) => (
+                            <tr key={row.p}>
+                              <td className="px-4 py-2 font-mono text-xs text-gray-400">{row.p}</td>
+                              <td className="px-4 py-2">{row.n}</td>
+                              <td className="px-4 py-2 font-mono text-xs text-gray-500">{row.v}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Examples List */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+                      <h3 className="font-semibold text-sm text-gray-900">Examples</h3>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      {[
+                        { desc: "Every 10 mins at 20s", val: "* * * * * */10 20" },
+                        { desc: "Every 2 hours at 0m 20s", val: "* * * * */2 0 20" },
+                        { desc: "Tuesdays at 10:30:20", val: "* * * tue 10 30 20" },
+                        { desc: "1st of month at 08:30:20", val: "* * 1 * 8 30 20" },
+                      ].map((ex, i) => (
+                        <div key={i} className="flex flex-col gap-1">
+                          <span className="text-xs font-medium text-gray-500">{ex.desc}</span>
+                          <code className="text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 text-gray-800 select-all">
+                            {ex.val}
+                          </code>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
             </div>
           </div>
+
+          {/* RIGHT SIDEBAR Vertical Ad (hidden on mobile) */}
+          <div className="hidden xl:block w-[160px] 2xl:w-[250px] shrink-0">
+            <div className="sticky top-24 min-h-[600px] rounded-xl overflow-hidden">
+              <ins
+                className="adsbygoogle"
+                style={{ display: 'block' }}
+                data-ad-client="ca-pub-1045963508580365"
+                data-ad-slot="5616122519"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+                data-adtest={isLocal ? "on" : undefined}
+              ></ins>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Horizontal Banner Ad */}
+        <div className="mt-8 flex justify-center min-h-[90px] w-full bg-gray-50 overflow-hidden">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-1045963508580365"
+            data-ad-slot="5616122519"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+            data-adtest={isLocal ? "on" : undefined}
+          ></ins>
+        </div>
+
+        {/* Mobile Square Ad (visible only on mobile) */}
+        <div className="mt-6 xl:hidden flex justify-center min-h-[250px] w-full bg-gray-50 overflow-hidden">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-1045963508580365"
+            data-ad-slot="5616122519"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+            data-adtest={isLocal ? "on" : undefined}
+          ></ins>
         </div>
       </main>
     </div>
