@@ -1,11 +1,10 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { 
   Clock, 
   CalendarDays, 
   Calendar,
   Copy, 
   CheckCircle2, 
-  Info, 
   Settings2,
   Terminal,
   RotateCcw,
@@ -18,8 +17,14 @@ import {
   Layers,
   Target,
   GitBranch,
-  Activity
+  Activity,
+  Mail,
+  Shield,
+  FileText
 } from "lucide-react";
+import PrivacyPolicy from "./PrivacyPolicy";
+import TermsConditions from "./TermsConditions";
+import Contact from "./Contact";
 
 // Comprehensive Documentation Component (Clean SaaS Style)
 function Docs({ onBack }) {
@@ -355,7 +360,7 @@ function Docs({ onBack }) {
 
 // Main App Component (Generator)
 export default function App() {
-  const [showDocs, setShowDocs] = useState(false);
+  const [currentPage, setCurrentPage] = useState("home"); // home, docs, privacy, terms, contact
   const [frequencyType, setFrequencyType] = useState("minute");
   const [repeatEvery, setRepeatEvery] = useState(10);
   const [hour, setHour] = useState(10);
@@ -493,11 +498,7 @@ export default function App() {
     }
   }, []);
 
-  if (showDocs) {
-    return <Docs onBack={() => setShowDocs(false)} />;
-  }
 
-  // Clean, functional syntax highlighting and standard tooltips
   const renderCronPart = (part, index) => {
     const isAsterisk = part === '*';
     const isNumber = !isNaN(part) && part !== '';
@@ -524,6 +525,20 @@ export default function App() {
     );
   };
 
+  // Handle page navigation - AFTER all hooks
+  if (currentPage === "docs") {
+    return <Docs onBack={() => setCurrentPage("home")} />;
+  }
+  if (currentPage === "privacy") {
+    return <PrivacyPolicy onBack={() => setCurrentPage("home")} />;
+  }
+  if (currentPage === "terms") {
+    return <TermsConditions onBack={() => setCurrentPage("home")} />;
+  }
+  if (currentPage === "contact") {
+    return <Contact onBack={() => setCurrentPage("home")} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
       {/* App Header (Expanded max width to accommodate broader layout) */}
@@ -549,7 +564,7 @@ export default function App() {
               <span className="hidden sm:inline">Reset</span>
             </button>
             <button
-              onClick={() => setShowDocs(true)}
+              onClick={() => setCurrentPage("docs")}
               className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-md hover:bg-blue-50"
             >
               <BookOpen className="w-4 h-4" />
@@ -912,6 +927,106 @@ export default function App() {
           ></ins>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* About */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="bg-blue-600 p-1 rounded">
+                  <Settings2 className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-gray-900">SAP Cron Generator</h3>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                A powerful and intuitive tool for creating and validating SAP XS Advanced cron expressions. 
+                Generate complex scheduling patterns with ease and precision.
+              </p>
+              <p className="text-xs text-gray-500">
+                © {new Date().getFullYear()} SAP Cron Generator. Made with ❤️ by Danesh Naik
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3 text-sm">Quick Links</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => setCurrentPage("docs")}
+                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    Documentation
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentPage("contact")}
+                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    Contact Us
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/danu20002"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <Code2 className="w-3.5 h-3.5" />
+                    GitHub
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3 text-sm">Legal</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => setCurrentPage("privacy")}
+                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    Privacy Policy
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentPage("terms")}
+                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Terms & Conditions
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-gray-500 text-center sm:text-left">
+              Not affiliated with SAP SE. SAP and SAP XS Advanced are trademarks of SAP SE.
+            </p>
+            <div className="flex items-center gap-4">
+              <a href="https://github.com/danu20002" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition-colors">
+                <Code2 className="w-4 h-4" />
+              </a>
+              <button onClick={() => setCurrentPage("contact")} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <Mail className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
