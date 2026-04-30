@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { 
   Clock, 
   CalendarDays, 
@@ -473,6 +473,23 @@ export default function App() {
   };
 
   const cronPartsNames = ["Year", "Month", "Day", "Day of Wk", "Hour", "Minute", "Second"];
+  const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const ads = document.querySelectorAll('.adsbygoogle');
+      ads.forEach(() => {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+          // ignore push errors
+        }
+      });
+    } catch (e) {
+      // no-op
+    }
+  }, []);
 
   if (showDocs) {
     return <Docs onBack={() => setShowDocs(false)} />;
@@ -521,6 +538,7 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ProfileCard />
             <button 
               onClick={handleReset}
               className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-md hover:bg-gray-100"
@@ -541,6 +559,18 @@ export default function App() {
 
       {/* Main Layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+        {/* Google AdSense banner (replace client and slot IDs) */}
+        <div className="mb-6 flex justify-center">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block', width: '100%', maxWidth: '728px', height: '90px' }}
+            data-ad-client="pub-1045963508580365"
+            data-ad-slot="REPLACE_SLOT"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+            data-adtest={isLocal ? "on" : undefined}
+          ></ins>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           
           {/* LEFT COLUMN: Controls */}
@@ -814,5 +844,44 @@ export default function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+// Profile card for the page (user: Danesh Naik)
+function ProfileCard() {
+  const profile = {
+    name: "Danesh Naik",
+    role: "Developer",
+    github: "danu20002",
+    loves: ["Forms", "UX", "Open Source"]
+  };
+
+  const initials = profile.name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("");
+
+  return (
+    <a
+      href={`https://github.com/${profile.github}`}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-3 text-sm text-gray-700 hover:text-gray-900"
+    >
+      <div className="relative w-8 h-8 rounded-full overflow-hidden bg-blue-600 flex-shrink-0">
+        <img
+          src={`https://avatars.githubusercontent.com/${profile.github}?s=80&v=4`}
+          alt={`${profile.name} avatar`}
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
+        <div className="w-full h-full flex items-center justify-center text-white font-medium">{initials}</div>
+      </div>
+      <div className="hidden sm:flex flex-col leading-tight">
+        <span className="text-sm font-semibold text-gray-900">{profile.role}</span>
+        <span className="text-xs text-gray-500">By {profile.name} <span className="ml-1">❤️</span></span>
+      </div>
+    </a>
   );
 }
